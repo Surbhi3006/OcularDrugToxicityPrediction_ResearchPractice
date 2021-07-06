@@ -121,7 +121,6 @@ if __name__=="__main__":
         X_backup_test = np.append(X_backup_test, X_backup,axis = 0)
         
         
-        print("heyyyy")
         #create dataframe from arraylist
         columns=['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM','Y_Actual']
         data_kfold = getDataFrameFromNParray(X_backup,columns)
