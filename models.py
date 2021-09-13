@@ -15,6 +15,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from keras.models import Sequential
+from keras.layers import Dense
 
 from utilities import *
 from models import *
@@ -135,3 +137,31 @@ def LogisticRegressionPredictor(mod,X_test):
     FinalPredicton = FinalPredicton.reshape(-1,1)
     FinalPredicton = FinalPredicton.astype(int)
     return FinalPredicton
+
+def ANNTrainer(X,Y):
+
+    #initialize ANN
+    classifier = Sequential()
+    
+    #add input layer and first hidden layer
+    classifier.add(Dense(6, activation = 'relu', input_dim = 7))
+    
+    #adding 2nd hidden layer
+    classifier.add(Dense(6, activation = 'relu'))
+    
+    #add output layer
+    classifier.add(Dense(1, activation = 'sigmoid'))
+    
+    #train the model
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    classifier.fit(X, Y, batch_size = 10, epochs=100)
+    return classifier
+    
+    
+def ANNPredictor(ann_classifier,X_test):
+    #predict values
+    Y_pred_ann = ann_classifier.predict(X_test)
+    Y_pred = (Y_pred_ann > 0.5)
+
+    #print("Y_pred : \n",Y_pred)
+    return Y_pred

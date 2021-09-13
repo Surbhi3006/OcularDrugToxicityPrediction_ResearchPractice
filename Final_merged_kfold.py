@@ -9,8 +9,10 @@ Created on Sun Jun 20 13:39:37 2021
 import numpy as np
 from sklearn.utils import shuffle
 from datetime import datetime
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import StratifiedKFold, KFold, RepeatedKFold
+from keras.models import Sequential
+from keras.layers import Dense
 
 from utilities import *
 from models import *
@@ -178,6 +180,23 @@ if __name__=="__main__":
     y_predValidate_xg = xgBoostPredictor(xg,X_validate)
     y_predValidate_svm = svmPredictor(svm,X_validate)
     
+    # ANN on a train:test split dataset, used to print the accuracy and confusion matrix
+    X_ann, Y_ann, X_test_ann, Y_test_ann = fetchTrainDatasetAnn(file_datasheet)
+    ann_classifier = ANNTrainer(X_ann, Y_ann)
+    y_predValidate_ann = ANNPredictor(ann_classifier,X_test_ann)
+    #confusion matrix
+    cm = confusion_matrix(Y_test_ann, y_predValidate_ann)
+    acc_score_ann = accuracy_score(Y_test_ann,y_predValidate_ann)
+    
+    # ANN used to give the predictions for the validation dataset
+    X_ann, Y_ann, X_test_ann = fetchDatasetAnn(file_datasheet,file_validationSheet)
+    ann_classifier = ANNTrainer(X_ann, Y_ann)
+    y_predValidate_ann = ANNPredictor(ann_classifier,X_test_ann)
+    
+    print("Confusion Matrix of ANN: \n: ",cm)
+    print("Accuracy Score for ANN: \n",acc_score_ann)
+
+    
     #append predictions and create dataframe
     pred_Validate_Values = appendPredictions(X_validatebackup, y_predValidate_knn, y_predValidate_rf, y_predValidate_dt,y_predValidate_naive,y_predValidate_xg,y_predValidate_svm)
     X_validatebackup = np.append(X_validatebackup,pred_Validate_Values,axis=1)
@@ -208,9 +227,13 @@ if __name__=="__main__":
     mod = logisticRegressionTrainer(X1,Y1)
     finalPredictedValue = LogisticRegressionPredictor(mod,X2)
     
+    # Prediction using Artificial Neural Network
+    
+    
     #appending the output to backup and storing in excel
     finalPredictedValue = np.append(X_validatebackup1,finalPredictedValue,axis=1)
-    colss = ['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predicted_Output']
+    finalPredictedValue = np.append(finalPredictedValue,y_predValidate_ann,axis=1)
+    colss = ['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predicted_Output_supervisedModel','Prediction_ANNModel']
     outputDataset = getDataFrameFromNParray(finalPredictedValue,colss)
     filename = datetime.now().strftime('OutputSheet/PredictionSheet_ValidationSet_kfold---%Y-%m-%d-%H-%M-%S.csv')
     exportToCSV(outputDataset,filename)
