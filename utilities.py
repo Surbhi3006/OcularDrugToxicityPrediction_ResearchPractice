@@ -33,7 +33,41 @@ def fetchDataset(sheet,cols):
     dataset = dataset11[cols]
     dataset.head()
     return dataset
+
+def fetchDatasetAnn(file_datasheet, file_validation):
+    dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
+    X = dataset.iloc[:,1:-1].values
+    Y = dataset.iloc[:, -1:].values
     
+    #fetch testing data from validation sheet
+    dataset = fetchDataset(file_validation,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume'])
+    X_test = dataset.iloc[:,1:].values
+    
+    #handle missing values and replace with mean value in train data
+    X = handleMissingValues(X)
+    X_test = handleMissingValues(X_test)
+    
+    #feature scale train data
+    sc_X, X = scaleSet(X)
+    sc_XT, X_test = scaleSet(X_test)
+    
+    return X,Y,X_test
+
+def fetchTrainDatasetAnn(file_datasheet):
+    dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
+    X = dataset.iloc[:,1:-1].values
+    Y = dataset.iloc[:, -1:].values
+    
+    #handle missing values and replace with mean value
+    X = handleMissingValues(X)
+    
+    #split data into training and testing dataset
+    X_train, X_test, Y_train, Y_test = splitDatasetToTrainTest(X,Y);
+    
+    #feature scale data
+    sc_X, X_train, X_test = featureScaleDataSet(X_train,X_test)
+    
+    return X_train, Y_train, X_test, Y_test
     
 def handleMissingValues(X):
     #handle missing values and replace with mean values
@@ -54,6 +88,11 @@ def featureScaleDataSet(train,test):
     train = sc_X.fit_transform(train)
     test = sc_X.transform(test)
     return sc_X,train,test
+
+def scaleSet(train):
+    sc_X = StandardScaler()
+    train = sc_X.fit_transform(train)
+    return sc_X,train
 
 def calculateAverageAccuracyOfModels(avg_models,list_knn,list_rf,list_dt,list_naive,list_xgboost,list_svm):
     avg_models.append(sum(list_knn) / len(list_knn))
