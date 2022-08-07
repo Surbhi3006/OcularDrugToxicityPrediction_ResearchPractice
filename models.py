@@ -3,7 +3,7 @@
 """
 Created on Sun Jun 20 13:46:56 2021
 
-@author: manisha
+@author: surbhi sharma
 """
 
 from sklearn.svm import SVC
@@ -64,6 +64,7 @@ def decisionTreeEntropyPredictor(clf_gini,X_test):
     return y_pred_dt
 
 
+# this model and function is not being used in main function - not modifying
 def c4_5_Trainer(X_train_c):
     #Predict using C4.5
     X_train_c = X_train_c[:,1:] #removing index from set
@@ -76,6 +77,7 @@ def c4_5_Trainer(X_train_c):
     return model
 
 
+# this model and function is not being used in main function - not modifying
 def c4_5_Predictor(model1,X_test):
     X_test = X_test[:,1:] #removing index from set
     X_test = X_test[:,:-1] #removing decision from test set
@@ -132,7 +134,7 @@ def logisticRegressionTrainer(X,Y):
     return mod
 
 
-def LogisticRegressionPredictor(mod,X_test):
+def logisticRegressionPredictor(mod,X_test):
     FinalPredicton = mod.predict(X_test)
     FinalPredicton = FinalPredicton.reshape(-1,1)
     FinalPredicton = FinalPredicton.astype(int)

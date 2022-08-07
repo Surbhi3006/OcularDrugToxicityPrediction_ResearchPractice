@@ -3,9 +3,10 @@
 """
 Created on Sun Jun 20 13:39:37 2021
 
-@author: manisha
+@author: surbhi sharma
 """
 
+import os
 import numpy as np
 from sklearn.utils import shuffle
 from datetime import datetime
@@ -27,21 +28,12 @@ list_naive = []
 list_xgboost = []
 list_svm = []
 avg_models = []
-modelsUsed = ["KNN","Random Forest","Decision Tree","Naive Bayes","XG-Boost","SVM"]
+modelsUsed = ["KNN","Random_Forest","Decision_Tree","Naive_Bayes","XG_Boost","SVM"]
 config = {'algorithm': 'C4.5'}
 
-#---------------- Datasets of 192 training and 142 validation ------------ #
-file_datasheet2 = 'DataSheets/Dataset_unshuffled_192.csv' #not shuffled
-file_datasheet = 'DataSheets/90.51_Sheet_192.csv' #shuffled
-file_validationSheet = 'DataSheets/Validation2_142.csv'
-# ----------------------------------------------------------------------- #
-
-
-#---------------- Datasets of 172 training and 23 validation ------------ #
-# file_datasheet_train = 'DataSheets/final/final_merged/92_Sheet_171.csv'
-# file_datasheet_val = 'DataSheets/final/final_merged/ValidationSet_23.csv'
-# file_datasheet = 'DataSheets/final/final_merged/92_Sheet_171.csv'
-# file_validationSheet = 'DataSheets/final/final_merged/ValidationSet_23.csv'
+#---------------- Datasets of 192 training and 513 validation ------------ #
+file_datasheet = 'inputSheets/90.51_Sheet_192.csv' #shuffled
+file_validationSheet = 'inputSheets/ScreeningData_Oct11.csv'
 # ----------------------------------------------------------------------- #
 
 
@@ -52,7 +44,7 @@ if __name__=="__main__":
     #working on Training dataset
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
+    dataset = fetchDataset(file_datasheet, fetchColumns(file_datasheet))
     X = dataset.iloc[:,:-1].values
     Y = dataset.iloc[:, -1:].values
     #X,Y = shuffle(X,Y)
@@ -112,10 +104,10 @@ if __name__=="__main__":
         list_svm.append(accuracy_score(Y_test, y_pred_svm))
         
         #calculate average accuracies of all models together and combine all results in 2-D array
-        predValues = appendPredictions(X_backup,y_pred_knn,y_pred_rf,y_pred_dt,y_pred_naive,y_pred_xg,y_pred_svm)
+        predValues = appendPredictions(X_backup, y_pred_knn, y_pred_rf, y_pred_dt, y_pred_naive, y_pred_xg, y_pred_svm)
         
         #merge Y_test and predicted values with X_backup
-        X_backup = np.append(X_backup,predValues,axis=1)
+        X_backup = np.append(X_backup, predValues, axis=1)
         X_backup = np.append(X_backup, Y_test, axis=1)
         
         # X_backup_test ------ contains predictions of all k fold test sets
@@ -124,34 +116,33 @@ if __name__=="__main__":
         
         
         #create dataframe from arraylist
-        columns=['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM','Y_Actual']
+        columns = combineLists(combineLists(fetchColumns(file_datasheet)[:-1], create_model_columns(modelsUsed)), ['Y_Actual'])
         data_kfold = getDataFrameFromNParray(X_backup,columns)
-        filename = datetime.now().strftime('KfoldOutputSheet/CombinedSheet---%Y-%m-%d-%H-%M-%S.%f.csv')
-        exportToCSV(data_kfold,filename)
-        
-        
+        #filename = datetime.now().strftime('outSheet/KfoldOutputSheet/CombinedSheet---%Y-%m-%d-%H-%M-%S.%f.csv')
+        #exportToCSV(data_kfold,filename)
+
+
     #create dataframe from arraylist
-    columns=['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM','Y_Actual']
+    columns = combineLists(combineLists(fetchColumns(file_datasheet)[:-1], create_model_columns(modelsUsed)), ['Y_Actual'])
     data = getDataFrameFromNParray(X_backup_test,columns)
-    filename = datetime.now().strftime('OutputSheet/CombinedSheet_withFeatures&Predictions---%Y-%m-%d-%H-%M-%S.csv')
-    exportToCSV(data,filename)
-    
-    #print(X_backup_test)
-    columns=['Index','Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM','Y_Actual']
+    #filename = datetime.now().strftime('outSheet/OutputSheet/CombinedSheet_withFeatures&Predictions---%Y-%m-%d-%H-%M-%S.csv')
+    #exportToCSV(data,filename)
+
+    columns = combineLists(combineLists([fetchColumns(file_datasheet)[0]], create_model_columns(modelsUsed)), ['Y_Actual'])
     data_logReg = getDataFrameFromNParray(data,columns)
-    filename = datetime.now().strftime('TrainSheetForLogReg/KFoldCombinedSheet---%Y-%m-%d-%H-%M-%S.csv')
-    exportToCSV(data_logReg,filename)
+    #filename = datetime.now().strftime('outSheet/TrainSheetForLogReg/KFoldCombinedSheet---%Y-%m-%d-%H-%M-%S.csv')
+    #exportToCSV(data_logReg,filename)
         
     avg_accuracy= calculateAverageAccuracyOfModels(avg_models,list_knn,list_rf,list_dt,list_naive,list_xgboost,list_svm)
     
     
-    features1 =['C Log P','ROTB','nON','nOHNH']
-    features2 = ['TPSA','Molecular Weight','Molecular Volume']
+    #features1 =['C Log P','ROTB','nON','nOHNH']
+    #features2 = ['TPSA','Molecular Weight','Molecular Volume']
     
     plotComparisonGraph(modelsUsed, avg_models)
-    plotBoxIndividual(dataset,'{0} Distribution')
-    plotBoxGrouped(dataset,features1,-4,18)
-    plotBoxGrouped(dataset,features2,-4,800)
+    #plotBoxIndividual(dataset,'{0} Distribution')
+    #plotBoxGrouped(dataset,features1,-4,18)
+    #plotBoxGrouped(dataset,features2,-4,800)
     
 
 
@@ -159,7 +150,7 @@ if __name__=="__main__":
     #working on Test dataset
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    dataVal = fetchDataset(file_validationSheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume'])
+    dataVal = fetchDataset(file_validationSheet, fetchColumns(file_validationSheet))
     X_validate = dataVal.values
     
     #handle missing values and replace with mean values
@@ -184,6 +175,7 @@ if __name__=="__main__":
     X_ann, Y_ann, X_test_ann, Y_test_ann = fetchTrainDatasetAnn(file_datasheet)
     ann_classifier = ANNTrainer(X_ann, Y_ann)
     y_predValidate_ann = ANNPredictor(ann_classifier,X_test_ann)
+
     #confusion matrix
     cm = confusion_matrix(Y_test_ann, y_predValidate_ann)
     acc_score_ann = accuracy_score(Y_test_ann,y_predValidate_ann)
@@ -193,16 +185,16 @@ if __name__=="__main__":
     ann_classifier = ANNTrainer(X_ann, Y_ann)
     y_predValidate_ann = ANNPredictor(ann_classifier,X_test_ann)
     
-    print("Confusion Matrix of ANN: \n: ",cm)
+    print("Confusion Matrix of ANN: \n",cm)
     print("Accuracy Score for ANN: \n",acc_score_ann)
 
     
     #append predictions and create dataframe
     pred_Validate_Values = appendPredictions(X_validatebackup, y_predValidate_knn, y_predValidate_rf, y_predValidate_dt,y_predValidate_naive,y_predValidate_xg,y_predValidate_svm)
     X_validatebackup = np.append(X_validatebackup,pred_Validate_Values,axis=1)
-    col_Validate = ['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM']
+    col_Validate = combineLists(fetchColumns(file_validationSheet), create_model_columns(modelsUsed))
     dataValidate = getDataFrameFromNParray(X_validatebackup, col_Validate)
-    #filename = datetime.now().strftime('OutputSheet/TestSheet---%Y-%m-%d-%H-%M-%S.csv')
+    #filename = datetime.now().strftime('outSheet/OutputSheet/TestSheet---%Y-%m-%d-%H-%M-%S.csv')
     #exportToCSV(dataValidate,filename)
 
 
@@ -211,12 +203,12 @@ if __name__=="__main__":
     #--------------------------------------------------------------------------------------------------------------------------------------------------------
     
     #create training and test dataset for logictic regression
-    column1 = ['Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM','Y_Actual']
-    #Traindataset = fetchDataset('DataSheets/final/kfold_logReg.csv',column1)
-    #Traindataset = fetchDataset('TrainSheetForLogReg/KFoldCombinedSheet1.csv',column1)
+    column1 = combineLists(create_model_columns(modelsUsed), ['Y_Actual'])
+    #Traindataset = fetchDataset('inputSheets/final/kfold_logReg.csv',column1)
+    #Traindataset = fetchDataset('outSheet/TrainSheetForLogReg/KFoldCombinedSheet1.csv',column1)
     Traindataset = data_logReg[column1]
     Traindataset.head()
-    column2 = ['Predict_KNN','Predict_RF','Predict_DT','Predict_Naive','Predict_XG-Boost','Predict_SVM']
+    column2 = create_model_columns(modelsUsed)
     dataValidate = dataValidate[column2]
     dataValidate.head()
     X1 = Traindataset.iloc[:,:-1].values
@@ -225,19 +217,29 @@ if __name__=="__main__":
     
     #applying logistic regression on predicted values of all models
     mod = logisticRegressionTrainer(X1,Y1)
-    finalPredictedValue = LogisticRegressionPredictor(mod,X2)
+    finalPredictedValue = logisticRegressionPredictor(mod,X2)
+    
+    
     
     # Prediction using Artificial Neural Network
     
     
     #appending the output to backup and storing in excel
+    prediction_cols = ['Predicted_Output_supervisedModel','Prediction_ANNModel']
     finalPredictedValue = np.append(X_validatebackup1,finalPredictedValue,axis=1)
     finalPredictedValue = np.append(finalPredictedValue,y_predValidate_ann,axis=1)
-    colss = ['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Predicted_Output_supervisedModel','Prediction_ANNModel']
+    colss = combineLists(fetchColumns(file_validationSheet), prediction_cols)
     outputDataset = getDataFrameFromNParray(finalPredictedValue,colss)
-    filename = datetime.now().strftime('OutputSheet/PredictionSheet_ValidationSet_kfold---%Y-%m-%d-%H-%M-%S.csv')
+    filename = datetime.now().strftime('outSheet/OutputSheet/PredictionSheet_ValidationSet_kfold---%Y-%m-%d-%H-%M-%S.csv')
     exportToCSV(outputDataset,filename)
     
-    plotPieChart(outputDataset)
+    #compare confusion matrix for supervised and ANN predictions
+    compare_pred = confusion_matrix(outputDataset[prediction_cols[0]], outputDataset[prediction_cols[1]])
+    print(f"Confusion matrix for final predictions for supervised learning model and ANN : \n{compare_pred}")
+    compare_acc_score_ann = accuracy_score(outputDataset[prediction_cols[0]], outputDataset[prediction_cols[1]])
+    print(f"Accuracy score for final predictions for supervised learning model and ANN : \n{compare_acc_score_ann}")
+    
+
+    #plotPieChart(outputDataset)
     print("Plots created successfully")
-    print("\nAnalysis and prediction completed successfully. File has been created that conatins the input and its respective predicted values.\n")
+    print(f"\nAnalysis and prediction completed successfully.\nFile has been created and conatins the input with corresponding predictions.\nFile Path - {os.path.relpath(filename)}")

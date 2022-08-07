@@ -3,7 +3,7 @@
 """
 Created on Sun Jun 20 13:46:35 2021
 
-@author: manisha
+@author: surbhi sharma
 """
 
 
@@ -28,11 +28,25 @@ list_xgboost = []
 list_svm = []
 modelsUsed = ["KNN","Random Forest","Decision Tree","Naive Bayes","XG-Boost","SVM"]
 
+def fetchColumns(sheet):
+	df = pd.read_csv(sheet)
+	columns = list(df.columns)
+	return columns
+
+
+def create_model_columns(models):
+	cols = list()
+	for n in models:
+		cols.append('predict_' + n)
+	return cols
+
+
 def fetchDataset(sheet,cols):
     dataset11 = pd.read_csv(sheet)
     dataset = dataset11[cols]
     dataset.head()
     return dataset
+
 
 def fetchDatasetAnn(file_datasheet, file_validation):
     dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
@@ -53,6 +67,7 @@ def fetchDatasetAnn(file_datasheet, file_validation):
     
     return X,Y,X_test
 
+
 def fetchTrainDatasetAnn(file_datasheet):
     dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
     X = dataset.iloc[:,1:-1].values
@@ -68,7 +83,8 @@ def fetchTrainDatasetAnn(file_datasheet):
     sc_X, X_train, X_test = featureScaleDataSet(X_train,X_test)
     
     return X_train, Y_train, X_test, Y_test
-    
+
+
 def handleMissingValues(X):
     #handle missing values and replace with mean values
     imputer = SimpleImputer(missing_values = np.nan, strategy = 'mean')
@@ -89,10 +105,12 @@ def featureScaleDataSet(train,test):
     test = sc_X.transform(test)
     return sc_X,train,test
 
+
 def scaleSet(train):
     sc_X = StandardScaler()
     train = sc_X.fit_transform(train)
     return sc_X,train
+
 
 def calculateAverageAccuracyOfModels(avg_models,list_knn,list_rf,list_dt,list_naive,list_xgboost,list_svm):
     avg_models.append(sum(list_knn) / len(list_knn))
@@ -146,3 +164,8 @@ def appendPredictions(X_backup,y_knn,y_rf,y_dt,y_nb,y_xg,y_svm):
 def exportToCSV(data,file):
     data.to_csv(file,index=False, header=True)
     return
+
+
+def combineLists(l1, l2):
+	l3 = l1 + l2
+	return l3

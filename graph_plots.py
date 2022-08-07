@@ -3,7 +3,7 @@
 """
 Created on Sun Jun 20 13:49:02 2021
 
-@author: manisha
+@author: surbhi sharma
 """
 
 import matplotlib.pyplot as plt
@@ -20,21 +20,22 @@ def plotComparisonGraph(modelsUsed,avg_models):
     plt.ylabel('Accuracy')
     plt.title("Accuracy plot for Supervised Machine Learning Models")
     plt.gcf().autofmt_xdate()
-    plt.show()
+    #plt.show()
+    plt.savefig('Plots/comparison_graph.png')
     return
 
 
 def plotScatterPlots(data):
-    plotFeatures(data[['Index','C Log P','Predicted_Output']],'C Log P','C Log P Distribution')
-    plotFeatures(data[['Index','TPSA','Predicted_Output']],'TPSA','TPSA Distribution')
-    plotFeatures(data[['Index','Molecular Weight','Predicted_Output']],'Molecular Weight','Molecular Weight Distribution')
-    plotFeatures(data[['Index','nON','Predicted_Output']],'nON','nON Distribution')
-    plotFeatures(data[['Index','nOHNH','Predicted_Output']],'nOHNH','nOHNH Distribution')
-    plotFeatures(data[['Index','Molecular Volume','Predicted_Output']],'Molecular Volume','Molecular Volume Distribution')
+    plotFeatures(data[['Index','C Log P','Predicted_Output']],'C Log P','C Log P Distribution','C Log P Distribution')
+    plotFeatures(data[['Index','TPSA','Predicted_Output']],'TPSA','TPSA Distribution','TPSA Distribution')
+    plotFeatures(data[['Index','Molecular Weight','Predicted_Output']],'Molecular Weight','Molecular Weight Distribution','Molecular Weight Distribution')
+    plotFeatures(data[['Index','nON','Predicted_Output']],'nON','nON Distribution','nON Distribution')
+    plotFeatures(data[['Index','nOHNH','Predicted_Output']],'nOHNH','nOHNH Distribution','nOHNH Distribution')
+    plotFeatures(data[['Index','Molecular Volume','Predicted_Output']],'Molecular Volume','Molecular Volume Distribution','Molecular Volume Distribution')
     return
 
     
-def plotFeatures(df,yaxis,tit):
+def plotFeatures(df, yaxis, tit, name):
     col = []
     for index,row in df.iterrows():
         if row['Predicted_Output'] == 0:
@@ -49,23 +50,24 @@ def plotFeatures(df,yaxis,tit):
     plt.plot([], c='blue', label='Substrates')
     plt.plot([], c='red', label='Non-Substrates')
     plt.legend()
-    plt.show()
+    #plt.show()
+    plt.savefig('Plots/' + name + '.png')
     return
 
 
 def plotBoxIndividual(data,title):
     data['compoundType'] = np.where(data['Decision'] == 0, 'Non-Substrates', 'Substrates')
-    plotWhiskerByFeatures(data,'C Log P',title)
-    plotWhiskerByFeatures(data,'TPSA',title)
-    plotWhiskerByFeatures(data,'Molecular Weight',title)
-    plotWhiskerByFeatures(data,'nON',title)
-    plotWhiskerByFeatures(data,'nOHNH',title)
-    plotWhiskerByFeatures(data,'ROTB',title)
-    plotWhiskerByFeatures(data,'Molecular Volume',title)  
+    plotWhiskerByFeatures(data,'C Log P',title,'C Log P whisker plot')
+    plotWhiskerByFeatures(data,'TPSA',title,'TPSA whisker plot')
+    plotWhiskerByFeatures(data,'Molecular Weight',title,'Molecular Weight whisker plot')
+    plotWhiskerByFeatures(data,'nON',title,'nON whisker plot')
+    plotWhiskerByFeatures(data,'nOHNH',title,'nOHNH whisker plot')
+    plotWhiskerByFeatures(data,'ROTB',title,'ROTB whisker plot')
+    plotWhiskerByFeatures(data,'Molecular Volume',title,'Molecular Volume whisker plot')  
     return
 
 
-def plotWhiskerByFeatures(data,feat,title):
+def plotWhiskerByFeatures(data,feat,title,name):
     substrates_feat = data[data['compoundType'] == 'Substrates'][feat]
     nonsubstrates_feat = data[data['compoundType'] == 'Non-Substrates'][feat]
     fig, ax = plt.subplots(figsize=(12, 7))
@@ -84,7 +86,8 @@ def plotWhiskerByFeatures(data,feat,title):
     colors_nonsubstrates = dict(color=colors[1])
     ax.boxplot(dataset[0], positions=[1], labels=[labels[0]], boxprops=dict(facecolor = "blue"), medianprops=colors_substrates, whiskerprops=colors_substrates, capprops=colors_substrates, flierprops=dict(markeredgecolor=colors[0]),patch_artist=True)
     ax.boxplot(dataset[1], positions=[2], labels=[labels[1]], boxprops=dict(facecolor = "red"), whiskerprops=colors_nonsubstrates, capprops=colors_nonsubstrates, flierprops=dict(markeredgecolor=colors[1]),patch_artist=True)
-    plt.show()
+    #plt.show()
+    plt.savefig('Plots/' + name + '.png')
     return
 
 def plotBoxGrouped(data,columns,a,b):
@@ -140,7 +143,9 @@ def plotBoxGrouped(data,columns,a,b):
     #plt.ylim(0, 800)
     plt.ylim(a,b)
     plt.tight_layout()
-    plt.show()
+    #plt.show()
+    plt.savefig('Plots/comparison by features and decision.png')
+    return
 
 
 def plotPieChart(data):
@@ -156,6 +161,7 @@ def plotPieChart(data):
     mylabels = ["Non-Substrates", "Substrates"]
     mycolors = ["red", "blue"]
     plt.pie(y, labels = mylabels, colors = mycolors,autopct='%.0f%%')
-    plt.show() 
+    #plt.show() 
+    plt.savefig('Plots/pie_chart of decision values.png')
     return
     
