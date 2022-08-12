@@ -49,12 +49,12 @@ def fetchDataset(sheet,cols):
 
 
 def fetchDatasetAnn(file_datasheet, file_validation):
-    dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
+    dataset = fetchDataset(file_datasheet,fetchColumns(file_datasheet))
     X = dataset.iloc[:,1:-1].values
     Y = dataset.iloc[:, -1:].values
     
     #fetch testing data from validation sheet
-    dataset = fetchDataset(file_validation,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume'])
+    dataset = fetchDataset(file_validation,fetchColumns(file_datasheet)[:-1])
     X_test = dataset.iloc[:,1:].values
     
     #handle missing values and replace with mean value in train data
@@ -69,7 +69,7 @@ def fetchDatasetAnn(file_datasheet, file_validation):
 
 
 def fetchTrainDatasetAnn(file_datasheet):
-    dataset = fetchDataset(file_datasheet,['Index','C Log P','TPSA','Molecular Weight','nON','nOHNH','ROTB','Molecular Volume','Decision'])
+    dataset = fetchDataset(file_datasheet,fetchColumns(file_datasheet))
     X = dataset.iloc[:,1:-1].values
     Y = dataset.iloc[:, -1:].values
     

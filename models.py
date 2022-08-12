@@ -141,15 +141,14 @@ def logisticRegressionPredictor(mod,X_test):
     return FinalPredicton
 
 def ANNTrainer(X,Y):
-
     #initialize ANN
     classifier = Sequential()
     
     #add input layer and first hidden layer
-    classifier.add(Dense(6, activation = 'relu', input_dim = 7))
+    classifier.add(Dense(len(X[0])-1, activation = 'relu', input_dim = len(X[0])))
     
     #adding 2nd hidden layer
-    classifier.add(Dense(6, activation = 'relu'))
+    classifier.add(Dense(len(X[0])-1, activation = 'relu'))
     
     #add output layer
     classifier.add(Dense(1, activation = 'sigmoid'))

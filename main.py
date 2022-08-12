@@ -32,8 +32,8 @@ modelsUsed = ["KNN","Random_Forest","Decision_Tree","Naive_Bayes","XG_Boost","SV
 config = {'algorithm': 'C4.5'}
 
 #---------------- Datasets of 192 training and 513 validation ------------ #
-file_datasheet = 'inputSheets/90.51_Sheet_192.csv' #shuffled
-file_validationSheet = 'inputSheets/ScreeningData_Oct11.csv'
+file_datasheet = 'inputSheets/OCT1-Trainingdataset-10Desc-11Aug2022.csv'  #'inputSheets/90.51_Sheet_192.csv' #shuffled
+file_validationSheet = 'inputSheets/Ocutox-Validationdatset-10Desc-11Aug2022.csv'
 # ----------------------------------------------------------------------- #
 
 
@@ -64,7 +64,8 @@ if __name__=="__main__":
     skf = StratifiedKFold(n_splits=5)
     rkf = RepeatedKFold(n_splits=5, n_repeats=5, random_state=42)
     final_scores = list()
-    X_backup_test = np.empty((0,15))
+    s = len(X[0]) + 7
+    X_backup_test = np.empty((0,s))
     
     for train, test in skf.split(X_df,Y_df):
         X_train, X_test = X_df.iloc[train].values, X_df.iloc[test].values
